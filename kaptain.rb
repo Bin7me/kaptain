@@ -42,13 +42,7 @@ class Kaptain
 
     time_to_quit?(input)
 
-    useful_komponents = []
-
-    komponents.each do |komponent|
-      if komponent.can_handle?(input)
-        useful_komponents << komponent
-      end
-    end
+    useful_komponents = find_komponents_for_input(input)
 
     worker = useful_komponents.sample
     if worker
