@@ -6,20 +6,15 @@ Dir[File.dirname(__FILE__) + '/komponents/*.rb'].each{|file| require file}
 Dir[File.dirname(__FILE__) + '/modules/*.rb'].each{|file| require file}
 
 require 'pp'
-require 'socket'
 
 class Kaptain
   include ConfigReader
 
-  attr_reader :komponents, :server, :port, :nick, :channel
+  attr_reader :komponents, :irc
 
   def initialize()
     @komponents = []
-    
-    @server = value_for(:server)
-    @port = value_for(:port)
-    @nick = value_for(:nick)
-    @channel = value_for(:channel)
+    @irc = IRC.new
 
     initialize_subclasses()
   end
@@ -28,26 +23,6 @@ class Kaptain
     Komponent.komponent_classes.each do |klass|
       @komponents << klass.new
     end
-  end
-
-  def send(message)
-    puts "--> #{message}"
-    @socket.send("#{message}\n", 0)
-  end
-
-  def connect()
-    @socket = TCPSocket.open(server, port)
-    send "USER #{nick} #{nick} #{nick} :#{nick}\r\n"
-    send "NICK #{nick}"
-  end
-
-  def join()
-    send "JOIN ##{channel}"
-    send "PRIVMSG ##{channel} :Hello everyone!"
-  end
-
-  def say(message, channel)
-    send "PRIVMSG ##{channel} :#{message}"
   end
 
   def find_komponents_for_input(input)
@@ -77,20 +52,26 @@ class Kaptain
   end
 
   def run
-    until @socket.eof? do
-      msg = @socket.gets
+    irc.connect
+
+    until irc.socket.eof? do
+      msg = irc.socket.gets
       puts msg
 
       case msg
         when /^PING :(.*)$/
-          send "PONG #{$~[1]}" 
-        when /^(.+?)001 kaptain :/  
-          join
+          irc.pong $~[1]
+        when /^(.+?)001 #{irc.nick} :/  
+          irc.join
         when /^:(\w+)!(\S+) PRIVMSG #(\S+) :(.+)/ 
-          if $~[3] == channel
-            puts "[LOG] Someone wrote something!"
+          if $~[3] == irc.channel
             response = respond_to($~[4])
-            say(response, channel) if response
+            irc.say_to_chan(response, $~[3]) if response
+          end
+        when /^:(\w+)!(\S+) PRIVMSG (\S+) :(.+)/ 
+          if $~[3] == irc.nick
+            response = respond_to($~[4])
+            irc.say_to_user(response, $~[1]) if response
           end
       end
     end
@@ -100,7 +81,6 @@ end
 
 kaptain = Kaptain.new
 puts "Kaptain loaded"
-kaptain.connect
 
 begin
   kaptain.run
