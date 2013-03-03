@@ -44,12 +44,17 @@ class Kaptain
 
     useful_komponents = find_komponents_for_input(input)
 
-    worker = useful_komponents.sample
-    if worker
-      worker.handle(input)
+    if useful_komponents.size > 0
+      answers = []
+      useful_komponents.each do |komponent|
+        answers << komponent.handle(input)
+      end
+
+      answers.sample
     else
-      input 
+      input
     end
+
   end
 end
 
