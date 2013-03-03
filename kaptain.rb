@@ -30,20 +30,24 @@ class Kaptain
     end
   end
 
-  def say(message)
+  def send(message)
     puts "--> #{message}"
     @socket.send("#{message}\n", 0)
   end
 
   def connect()
     @socket = TCPSocket.open(server, port)
-    say "USER #{nick} #{nick} #{nick} :#{nick}\r\n"
-    say "NICK #{nick}"
+    send "USER #{nick} #{nick} #{nick} :#{nick}\r\n"
+    send "NICK #{nick}"
   end
 
   def join()
-    say "JOIN ##{channel}"
-    say "PRIVMSG ##{channel} :Hello everyone!"
+    send "JOIN ##{channel}"
+    send "PRIVMSG ##{channel} :Hello everyone!"
+  end
+
+  def say(message, channel)
+    send "PRIVMSG ##{channel} :#{message}"
   end
 
   def find_komponents_for_input(input)
@@ -56,7 +60,7 @@ class Kaptain
     useful_komponents
   end
 
-  def answer(input)
+  def respond_to(input)
     input.chomp!
 
     useful_komponents = find_komponents_for_input(input)
@@ -79,12 +83,15 @@ class Kaptain
 
       case msg
         when /^PING :(.*)$/
-          say "PONG #{$~[1]}" 
+          send "PONG #{$~[1]}" 
         when /^(.+?)001 kaptain :/  
           join
-        else
-          response = answer(msg)
-          say "PRIVMSG ##{channel} : #{response}" if response
+        when /^:(\w+)!(\S+) PRIVMSG #(\S+) :(.+)/ 
+          if $~[3] == channel
+            puts "[LOG] Someone wrote something!"
+            response = respond_to($~[4])
+            say(response, channel) if response
+          end
       end
     end
   end
