@@ -3,15 +3,24 @@
 
 Dir[File.dirname(__FILE__) + '/lib/*.rb'].each{|file| require file}
 Dir[File.dirname(__FILE__) + '/komponents/*.rb'].each{|file| require file}
+Dir[File.dirname(__FILE__) + '/modules/*.rb'].each{|file| require file}
+
 require 'pp'
+require 'socket'
 
 class Kaptain
-  attr_reader :komponents
-  attr_accessor :running
+  include ConfigReader
+
+  attr_reader :komponents, :server, :port, :nick, :channel
 
   def initialize()
-    @running = true
     @komponents = []
+    
+    @server = value_for(:server)
+    @port = value_for(:port)
+    @nick = value_for(:nick)
+    @channel = value_for(:channel)
+
     initialize_subclasses()
   end
 
@@ -21,10 +30,20 @@ class Kaptain
     end
   end
 
-  def time_to_quit?(input)
-    if input =~ /\/quit/
-      @running = false
-    end
+  def say(message)
+    puts "--> #{message}"
+    @socket.send("#{message}\n", 0)
+  end
+
+  def connect()
+    @socket = TCPSocket.open(server, port)
+    say "USER #{nick} #{nick} #{nick} :#{nick}\r\n"
+    say "NICK #{nick}"
+  end
+
+  def join()
+    say "JOIN ##{channel}"
+    say "PRIVMSG ##{channel} :Hello everyone!"
   end
 
   def find_komponents_for_input(input)
@@ -40,8 +59,6 @@ class Kaptain
   def answer(input)
     input.chomp!
 
-    time_to_quit?(input)
-
     useful_komponents = find_komponents_for_input(input)
 
     if useful_komponents.size > 0
@@ -53,20 +70,37 @@ class Kaptain
 
       answers.sample if answers.size > 0
     end
-
   end
+
+  def run
+    until @socket.eof? do
+      msg = @socket.gets
+      puts msg
+
+      case msg
+        when /^PING :(.*)$/
+          say "PONG #{$~[1]}" 
+        when /^(.+?)001 kaptain :/  
+          join
+        else
+          response = answer(msg)
+          say "PRIVMSG ##{channel} : #{response}" if response
+      end
+    end
+  end
+
 end
 
-def main_loop()
-  kaptain = Kaptain.new
+kaptain = Kaptain.new
+puts "Kaptain loaded"
+kaptain.connect
 
-  puts "Kaptain loaded"
-
-  while kaptain.running do
-    print "> "
-    input = gets
-    pp kaptain.answer(input)
-  end
+begin
+  kaptain.run
+rescue Interrupt
+rescue Exception => detail
+  puts detail.message()
+  print detail.backtrace.join("\n")
+  retry
 end
 
-main_loop
