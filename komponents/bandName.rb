@@ -1,10 +1,10 @@
 class BandName < Komponent
 
-  class << self
-    attr_reader :PROBABILITY
-  end
+  attr_reader :probability
 
-  @PROBABILITY = 1
+  def post_construct()
+    @probability = value_for(:probability).to_f
+  end
 
   def can_handle?(input)
     if input.split.length == 3
@@ -16,7 +16,7 @@ class BandName < Komponent
 
   def handle(input)
     prob = Random.rand(1.to_f)
-    if prob <= self.class.PROBABILITY
+    if prob <= probability
       ">>#{input}<< would be a nice name for a Rock Band!"
     end
   end

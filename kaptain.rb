@@ -46,13 +46,12 @@ class Kaptain
 
     if useful_komponents.size > 0
       answers = []
+
       useful_komponents.each do |komponent|
         answers << komponent.handle(input)
       end
 
-      answers.sample
-    else
-      input
+      answers.sample if answers.size > 0
     end
 
   end
@@ -66,7 +65,7 @@ def main_loop()
   while kaptain.running do
     print "> "
     input = gets
-    puts kaptain.answer(input)
+    pp kaptain.answer(input)
   end
 end
 
