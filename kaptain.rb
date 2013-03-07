@@ -63,15 +63,21 @@ class Kaptain
           irc.pong $~[1]
         when /^(.+?)001 #{irc.nick} :/  
           irc.join
-        when /^:(\w+)!(\S+) PRIVMSG #(\S+) :(.+)/ 
-          if $~[3] == irc.channel
-            response = respond_to($~[4])
-            irc.say_to_chan(response, $~[3]) if response
-          end
-        when /^:(\w+)!(\S+) PRIVMSG (\S+) :(.+)/ 
-          if $~[3] == irc.nick
-            response = respond_to($~[4])
-            irc.say_to_user(response, $~[1]) if response
+        when /^:(\w+)!(\S+) (\S+) (\S+) :(.+)/ 
+          msgBag = {
+            from: $~[1],
+            host: $~[2],
+            cmd: $~[3],
+            to: $~[4],
+            content: $~[5]
+          }
+
+          response = respond_to(msgBag[:content])
+
+          if msgBag[:to][0] == '#' 
+            irc.say_to_chan(response, msgBag[:to]) if response
+          else
+            irc.say_to_user(response, msgBag[:to]) if response
           end
       end
     end

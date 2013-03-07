@@ -4,29 +4,30 @@ require_relative '../modules/configreader'
 class IRC
   include ConfigReader
 
-  attr_reader :server, :port, :nick, :channel, :socket
+  attr_reader :server, :port, :nick, :channel, :socket, :ownerinfo
 
   def initialize()
     @server = value_for(:server)
     @port = value_for(:port)
     @nick = value_for(:nick)
-    @channel = value_for(:channel)
+    @channel = "#" << value_for(:channel)
+    @ownerinfo = value_for(:ownerinfo)
   end
 
   def send(message)
     puts "--> #{message}"
-    @socket.send("#{message}\n", 0)
+    socket.send("#{message}\n", 0)
   end
 
   def connect()
     @socket = TCPSocket.open(server, port)
-    send "USER #{nick} #{nick} #{nick} :#{nick}\r\n"
+    send "USER #{nick} #{nick} #{nick} :#{ownerinfo}\r\n"
     send "NICK #{nick}"
   end
 
   def join()
-    send "JOIN ##{channel}"
-    send "PRIVMSG ##{channel} :Hello everyone!"
+    send "JOIN #{channel}"
+    send "PRIVMSG #{channel} :Hello everyone!"
   end
 
   def pong(ping)
@@ -34,7 +35,7 @@ class IRC
   end
 
   def say_to_chan(message, channel)
-    send "PRIVMSG ##{channel} :#{message}"
+    send "PRIVMSG #{channel} :#{message}"
   end
 
   def say_to_user(message, user)
