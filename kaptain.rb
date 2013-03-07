@@ -25,26 +25,26 @@ class Kaptain
     end
   end
 
-  def find_komponents_for_input(input)
+  def find_komponents_for_input(msgBag)
     useful_komponents = []
     komponents.each do |komponent|
-      if komponent.can_handle?(input)
+      if komponent.can_handle?(msgBag)
         useful_komponents << komponent
       end
     end
     useful_komponents
   end
 
-  def respond_to(input)
-    input.chomp!
+  def respond_to(msgBag)
+    msgBag[:content].chomp!
 
-    useful_komponents = find_komponents_for_input(input)
+    useful_komponents = find_komponents_for_input(msgBag)
 
     if useful_komponents.size > 0
       answers = []
 
       useful_komponents.each do |komponent|
-        answers << komponent.handle(input)
+        answers << komponent.handle(msgBag)
       end
 
       answers.sample if answers.size > 0
@@ -72,7 +72,7 @@ class Kaptain
             content: $~[5]
           }
 
-          response = respond_to(msgBag[:content])
+          response = respond_to(msgBag)
 
           if msgBag[:to][0] == '#' 
             irc.say_to_chan(response, msgBag[:to]) if response

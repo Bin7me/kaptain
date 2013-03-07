@@ -16,12 +16,11 @@ class Komponent
     #to be overwritten by subclasses
   end
 
-  def can_handle?(input)
+  def can_handle?(msgBag)
     false
   end
 
-  def handle(input)
-    input 
+  def handle(msgBag)
   end
 
   def self.inherited(subclass)
