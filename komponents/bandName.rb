@@ -1,6 +1,6 @@
 class BandName < Komponent
 
-  attr_reader :probability
+  attr_accessor:probability
 
   def post_construct()
     @probability = value_for(:probability).to_f
