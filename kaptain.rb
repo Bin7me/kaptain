@@ -63,13 +63,7 @@ class Kaptain
         when /^(.+?)001 #{irc.nick} :/  
           irc.join
         when /^:(\w+)!(\S+) (\S+) (\S+) :(.+)/ 
-          msgBag = {
-            from: $~[1],
-            host: $~[2],
-            cmd: $~[3],
-            to: $~[4],
-            content: $~[5]
-          }
+          msgBag = MsgBag.new($~[1], $~[2], $~[3], $~[4], $~[5])
 
           response = respond_to(msgBag)
 
