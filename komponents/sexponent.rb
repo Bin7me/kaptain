@@ -7,7 +7,7 @@ class Sexponent < Komponent
   end
 
   def can_handle?(msgBag)
-    if msgBag [:content] =~ regsex 
+    if msgBag[:content] =~ regsex 
       true
     else
       false
@@ -15,8 +15,8 @@ class Sexponent < Komponent
   end
 
   def handle(msgBag)
-    msgBag[:content].gsub!("ex", "sex")
-    msgBag[:content].gsub!("Ex", "Sex")
+    msgBag[:content] = msgBag[:content].gsub("ex", "sex")
+    msgBag[:content] = msgBag[:content].gsub("Ex", "Sex")
     msgBag[:content]
   end
 end

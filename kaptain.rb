@@ -8,7 +8,6 @@ Dir[File.dirname(__FILE__) + '/modules/*.rb'].each{|file| require file}
 require 'pp'
 
 class Kaptain
-  include ConfigReader
 
   attr_reader :komponents, :irc
 
@@ -36,7 +35,7 @@ class Kaptain
   end
 
   def respond_to(msgBag)
-    msgBag[:content].chomp!
+    msgBag[:content] = msgBag[:content].chomp
 
     useful_komponents = find_komponents_for_input(msgBag)
 
