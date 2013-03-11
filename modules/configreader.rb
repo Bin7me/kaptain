@@ -1,7 +1,7 @@
 require 'parseconfig'
 
 module ConfigReader
-  CONFIG_NAME = 'kaptain.cfg'
+  CONFIG_NAME = File.join(File.dirname(__FILE__), '..', 'kaptain.cfg')
   CONFIG = ParseConfig.new(CONFIG_NAME)
 
   def value_for(attribute)
