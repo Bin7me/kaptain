@@ -8,19 +8,19 @@ require File.join(File.dirname(__FILE__), '..', '/komponents/sexponent.rb')
 describe Sexponent, "can_handle?(msgBag)" do
   sexponent = Sexponent.new
 
-  it "can handle a message bag with :content containing 'ex'" do
+  it "returns true for a message bag with :content containing 'ex'" do
     msgBag = MsgBag.new(nil, nil, nil, nil, "A small experiment")
       
     sexponent.can_handle?(msgBag).should eq(true)
   end
 
-  it "can handle a message bag with :content containing 'Ex'" do
+  it "returns true for a message bag with :content containing 'Ex'" do
     msgBag = MsgBag.new(nil, nil, nil, nil, "A small Experiment")
 
     sexponent.can_handle?(msgBag).should eq(true) 
   end
 
-  it "doesn't handle a message bag with :content containing neither containing 'ex' nor 'Ex'" do
+  it "returns false for a message bag with :content containing neither 'ex' nor 'Ex'" do
     msgBag = MsgBag.new(nil, nil, nil, nil, "A small String")
 
     sexponent.can_handle?(msgBag).should eq(false) 
