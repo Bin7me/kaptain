@@ -58,11 +58,11 @@ class Kaptain
       puts msg
 
       case msg
-        when /^PING :(.*)$/
+        when /^PING :(.*)$/ #respond to pings
           irc.pong $~[1]
-        when /^(.+?)001 #{irc.nick} :/  
+        when /^(.+?)001 #{irc.nick} :/ #wait until the right moment to join 
           irc.join
-        when /^:(\w+)!(\S+) (\S+) (\S+) :(.+)/ 
+        when /^:(\w+)!(\S+) (\S+) (\S+) :(.+)/ #repsond to chan or query msgs and parts
           msgBag = MsgBag.new($~[1], $~[2], $~[3], $~[4], $~[5])
 
           response = respond_to(msgBag)
@@ -72,6 +72,12 @@ class Kaptain
           else
             irc.say_to_user(response, msgBag[:to]) if response
           end
+        when /^:(\w+)!(\S+) (\S+) :(.+)/ #respond to joins
+          msgBag = MsgBag.new($~[1], $~[2], $~[3], $~[4], nil)
+
+          response = respond_to(msgBag)
+
+          irc.say_to_chan(response, msgBag[:to]) if response
       end
     end
   end
