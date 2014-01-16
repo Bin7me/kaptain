@@ -4,6 +4,7 @@ class Sexponent < Komponent
 
   def post_construct()
     @regsex = /\bex\w*/i
+    @commands = [:PRIVMSG]
   end
 
   def can_handle?(msgBag)

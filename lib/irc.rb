@@ -36,10 +36,14 @@ class IRC
   end
 
   def say_to_chan(message, channel)
-    send "PRIVMSG #{channel} :#{message}"
+    msg = "PRIVMSG #{channel} :#{message}"
+    puts msg
+    send msg
   end
 
   def say_to_user(message, user)
-    send "PRIVMSG #{user} :#{message}"
+    msg = "PRIVMSG #{user} :#{message}"
+    puts msg
+    send msg
   end
 end

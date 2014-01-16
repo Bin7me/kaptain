@@ -6,9 +6,12 @@ class Komponent
     attr_reader :komponent_classes
   end
 
+  attr_reader :commands
+
   @komponent_classes = []
 
   def initialize
+    @commands = []
     post_construct
   end
 

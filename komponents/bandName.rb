@@ -1,9 +1,11 @@
 class BandName < Komponent
 
-  attr_accessor:probability
+  attr_accessor :probability
+  attr_reader :commands
 
   def post_construct()
     @probability = value_for(:probability).to_f
+    @commands = [:PRIVMSG]
   end
 
   def can_handle?(msgBag)

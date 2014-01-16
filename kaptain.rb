@@ -10,8 +10,10 @@ require 'pp'
 class Kaptain
 
   attr_reader :komponents, :irc
+  attr_accessor :commands_hash
 
   def initialize()
+    @commands_hash = Hash.new()
     @komponents = []
     @irc = IRC.new
 
@@ -20,13 +22,27 @@ class Kaptain
 
   def initialize_subclasses()
     Komponent.komponent_classes.each do |klass|
-      @komponents << klass.new
+      instance = klass.new
+
+      pp instance.commands
+      instance.commands.each do |command|
+        commands_hash[command] ||= []
+        commands_hash[command] << instance
+      end
+      
+      @komponents << instance
     end
   end
 
   def find_komponents_for_input(msgBag)
     useful_komponents = []
-    komponents.each do |komponent|
+
+    commands_hash[msgBag[:cmd]] ||= []
+    komponents_for_cmd = commands_hash[msgBag[:cmd]]
+
+    pp komponents_for_cmd
+    
+    komponents_for_cmd.each do |komponent|
       if komponent.can_handle?(msgBag)
         useful_komponents << komponent
       end
@@ -35,6 +51,7 @@ class Kaptain
   end
 
   def respond_to(msgBag)
+    msgBag[:content] = "" if msgBag[:content].nil?
     msgBag[:content] = msgBag[:content].chomp
 
     useful_komponents = find_komponents_for_input(msgBag)
@@ -63,19 +80,21 @@ class Kaptain
         when /^(.+?)001 #{irc.nick} :/ #wait until the right moment to join 
           irc.join
         when /^:(\w+)!(\S+) (\S+) (\S+) :(.+)/ #repsond to chan or query msgs and parts
-          msgBag = MsgBag.new($~[1], $~[2], $~[3], $~[4], $~[5])
+          msgBag = MsgBag.new($~[1], $~[2], $~[3].to_sym, $~[4], $~[5])
 
           response = respond_to(msgBag)
+          pp msgBag
 
           if msgBag[:to][0] == '#' 
             irc.say_to_chan(response, msgBag[:to]) if response
           else
-            irc.say_to_user(response, msgBag[:to]) if response
+            irc.say_to_user(response, msgBag[:from]) if response
           end
         when /^:(\w+)!(\S+) (\S+) :(.+)/ #respond to joins
-          msgBag = MsgBag.new($~[1], $~[2], $~[3], $~[4], nil)
+          msgBag = MsgBag.new($~[1], $~[2], $~[3].to_sym, $~[4], nil)
 
           response = respond_to(msgBag)
+          pp msgBag
 
           irc.say_to_chan(response, msgBag[:to]) if response
       end
